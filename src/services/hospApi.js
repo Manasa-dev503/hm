@@ -33,7 +33,7 @@ export const hospApi = createApi({
           body:details
         }
       }
-    }),
+    })
   }),
 })
 // Export hooks for usage in functional components, which are
@@ -44,7 +44,5 @@ export const {
     useAddBedsMutation,
     useGetHospitalDetailsByIdQuery,
     useLazyGetAllHospitalsQuery,
-    useLazyGetHospitalDetailsByIdQuery,
-    useGetadminsQuery,
- } = hospApi;
-
+    useLazyGetHospitalDetailsByIdQuery
+ } = hospApi

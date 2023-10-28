@@ -18,9 +18,6 @@ function HospitalDetails() {
     var [beds,setBeds] = useState(null);
     var [bedTypes,setBedTypes] = useState([]);
     var [selectedBed,setSelectedBed] = useState(-1)
-    var [ isAdminBooking , setIsadminbooking ] = useState(null)
-    var [ name , setName ] = useState(null);
-    var [ mobile , setMobile ] = useState(null);
     useEffect(()=>{
         if(data){
             var bedsByCategory = _.groupBy(data.beds,"bedtype");
@@ -33,7 +30,12 @@ function HospitalDetails() {
             setBedTypes([...temp])
         }
     },[data])
-    
+    console.log(data)
+    //data.beds.map((a)=>{
+      //  return a.patients.map((patient)=>{
+      //      return {...patient,pstatus:"ongoing"}
+      //  })
+    //})
     function occupyBed(bid){
         console.clear();
         console.log(data)
@@ -51,87 +53,40 @@ function HospitalDetails() {
         var bedsByCategory = _.groupBy(tempBeds,"bedtype");
         setBeds(bedsByCategory)
     }
-        function updateHospital(){
-        if(user){
-            if(isAdmin){
-                setIsadminbooking(1);
-            }
-            if(!isAdmin){
-                var temp = Object.values(beds).flat(1);
-                temp = temp.map((b)=>{
-                    if(b.bedId===selectedBed){
-                        return {...b,patients:[...b.patients,{useremail:user.mailId,name:user.name,status:'ongoing'}]}
-                    }
-                    else{
-                        return b
-                    }
-                })
-                data = {...data,beds:[...temp]}
-                updateBeds(data).then(()=>{
-                    alert("Update Success...");
-                    getHospitalDetails(p.id)
-                })
-            }
-        }
-        if(!user){
-            signInWithPopup(auth,provider)
-            .then((result) => {
-                const credential = GoogleAuthProvider.credentialFromResult(result);
-                const token = credential.accessToken;
-                const user = result.user;
-                console.log(token)
-                var xyz = admins.filter((admin)=>{
-                    return (admin===user.email)
-                })
-                console.log(xyz)
-                var userDetails = {
-                    name:user.displayName,
-                    mailId:user.email,
-                    image:user.photoURL
+    function updateHospital(){
+        
+        const auth = getAuth();
+        signInWithPopup(auth,provider)
+        .then((result) => {
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential.accessToken;
+            const user = result.user;
+            
+            console.clear();
+            console.log(beds)
+            console.log(user)
+            console.log(token)
+
+            var temp = Object.values(beds).flat(1);
+            temp = temp.map((b)=>{
+                if(b.bedId===selectedBed){
+                    return {...b,patients:[...b.patients,{useremail:user.email,token:user.accessToken}]}
                 }
-                if(xyz.length>0){
-                    dispatch(changeUser({isadmin:true,user:userDetails}));
-                    setIsadminbooking(1)
+                else{
+                    return b
                 }
-                if(xyz.length==0){
-                    dispatch(changeUser({isadmin:false,user:userDetails}));
-                    var temp = Object.values(beds).flat(1);
-                    temp = temp.map((b)=>{
-                        if(b.bedId===selectedBed){
-                            return {...b,patients:[...b.patients,{useremail:user.email,name:user.displayName,status:'ongoing'}]}
-                        }
-                        else{
-                            return b
-                        }
-                    })
-                    data = {...data,beds:[...temp]}
-                    updateBeds(data).then(()=>{
-                        alert("Update Success...");
-                        getHospitalDetails(p.id)
-                    })
-                }
-            }).catch((error) => {
+            })
+            data = {...data,beds:[...temp]}
+            updateBeds(data).then(()=>{
+                alert("Update Success...");
+                getHospitalDetails(p.id)
+            })
+        }).catch((error) => {
             console.log(error)
-            });
-        }
-    }
-    function bookByadmin(){
-        var temp = Object.values(beds).flat(1);
-        temp = temp.map((b)=>{
-            if(b.bedId===selectedBed){
-                return {...b,patients:[...b.patients,{username:name,mobile:mobile,status:'ongoing'}]}
-            }
-            else{
-                return b
-            }
-        })
-        data={...data,beds:[...temp]}
-        updateBeds(data).then(()=>{
-            alert("Update Success...");
-            getHospitalDetails(p.id);
-            setIsadminbooking(null)
-        })
-    }
+        });
+
+        
+    }   
   return (
     <div>
         <h1>HospitalDetails</h1>
